@@ -7,11 +7,10 @@
 
 import UIKit
 
-class ViewController: UIViewController {
-
-    @IBOutlet private var scrollView: UIScrollView!
+class ViewController: UIViewController, UIScrollViewDelegate {
     
-    var slidewindows: [SlideWindow] = []
+    @IBOutlet private var scrollView: UIScrollView!
+    var slideWindows: [SlideWindow] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,10 +19,10 @@ class ViewController: UIViewController {
         setupWindows()
         loadWindows()
     }
+    
     private func setupScrollView() {
         scrollView.delegate = self
         scrollView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height)
-        scrollView.contentSize = CGSize(width: view.frame.size.width*3, height: scrollView.frame.size.height)
         scrollView.isPagingEnabled = true
     }
     
@@ -31,24 +30,28 @@ class ViewController: UIViewController {
         let window1 = SlideWindow(title: "Window_1", imageName: "image1", description: "Many - many text here. Bla - bla - bla... End of text)", backgroundColor: UIColor(red: 1, green: 0.816, blue: 0.714, alpha: 1))
         let window2 = SlideWindow(title: "Window_2", imageName: "image2", description: "ohhh... again... Many - many text here. Bla - bla - bla... End of text)", backgroundColor: UIColor(red: 1, green: 0.875, blue: 0.714, alpha: 1))
         let window3 = SlideWindow(title: "Window_3", imageName: "image3", description: "ohhh... again... Many - many text here. Bla - bla - bla... End of text)", backgroundColor: UIColor(red: 0.627, green: 0.847, blue: 0.835, alpha: 1))
-        slidewindows = [window1, window2, window3]
+        slideWindows = [window1, window2, window3]
     }
-
-    private func  loadWindows() {
+    
+    private func loadWindows() {
+        scrollView.contentSize = CGSize(width: view.frame.size.width*CGFloat(slideWindows.count), height: scrollView.frame.size.height)
         
-        for i in 0..<slidewindows.count {
+        for i in 0..<slideWindows.count {
             let slide: WindowView = Bundle.main.loadNibNamed("WindowView", owner: self, options: nil)?.first as! WindowView
             slide.frame = CGRect(x: CGFloat(i)*view.frame.size.width, y: 0, width: view.frame.size.width, height: scrollView.frame.size.height)
-            slide.setupView(title: slidewindows[i].title, image: slidewindows[i].imageName, description: slidewindows[i].description, pagesCount: slidewindows.count, currentPage: i, backgroundColor: slidewindows[i].backgroundColor)
+            slide.setupView(title: slideWindows[i].title, image: slideWindows[i].imageName, description: slideWindows[i].description, pagesCount: slideWindows.count, currentPage: i, backgroundColor: slideWindows[i].backgroundColor)
             scrollView.addSubview(slide)
+            slide.buttonHandler = { [weak self] in
+                self?.scrollForward()
+            }
         }
     }
     
-    func scrollForward(index: Int) {
-        scrollView.setContentOffset(CGPoint(x: CGFloat(index)*view.frame.size.width, y: 0), animated: true)
+    func scrollForward() {
+        let index = scrollView.contentOffset.x / scrollView.frame.size.width
+        if index < CGFloat(slideWindows.count)-1 {
+            scrollView.setContentOffset(CGPoint(x: CGFloat(index+1)*view.frame.size.width, y: 0), animated: true)
+            print("Scroll")
+        }
     }
 }
-extension ViewController: UIScrollViewDelegate {
-    
-}
-
